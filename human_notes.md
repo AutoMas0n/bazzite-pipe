@@ -1,1 +1,0 @@
-continue with progress, draft requirements from what is needed from the human side to provide to the agent.

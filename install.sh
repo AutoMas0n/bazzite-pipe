@@ -163,12 +163,13 @@ zerotier_menu() {
         print_header "ZeroTier Network Manager"
         
         echo "1. Install ZeroTier"
-        echo "2. Manage Connections (requires ZeroTier installed)"
-        echo "3. Test Network (requires ZeroTier installed)"
-        echo "4. Back to Main Menu"
+        echo "2. Join Network from Config URL (Quick Setup)"
+        echo "3. Manage Connections (requires ZeroTier installed)"
+        echo "4. Test Network (requires ZeroTier installed)"
+        echo "5. Back to Main Menu"
         echo ""
         
-        read -r -p "Select an option (1-4): " choice
+        read -r -p "Select an option (1-5): " choice
         echo ""
         
         case "${choice}" in
@@ -181,20 +182,38 @@ zerotier_menu() {
                 fi
                 ;;
             2)
+                log_info "Join network from configuration file"
+                echo ""
+                echo "Enter the URL to your ZeroTier configuration file"
+                echo "Example: https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/zerotier-config.json"
+                echo ""
+                read -r -p "Config URL: " config_url
+                
+                if [[ -n "${config_url}" ]]; then
+                    if [[ -f "${SCRIPT_DIR}/scripts/zerotier/config-loader.sh" ]]; then
+                        run_local_script "scripts/zerotier/config-loader.sh" "${config_url}"
+                    else
+                        run_remote_script "scripts/zerotier/config-loader.sh" "${config_url}"
+                    fi
+                else
+                    log_warn "No URL provided"
+                fi
+                ;;
+            3)
                 if [[ -f "${SCRIPT_DIR}/scripts/zerotier/manager.sh" ]]; then
                     run_local_script "scripts/zerotier/manager.sh"
                 else
                     run_remote_script "scripts/zerotier/manager.sh"
                 fi
                 ;;
-            3)
+            4)
                 if [[ -f "${SCRIPT_DIR}/scripts/zerotier/test.sh" ]]; then
                     run_local_script "scripts/zerotier/test.sh"
                 else
                     run_remote_script "scripts/zerotier/test.sh"
                 fi
                 ;;
-            4)
+            5)
                 return 0
                 ;;
             *)

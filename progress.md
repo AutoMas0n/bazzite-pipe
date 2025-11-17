@@ -3,8 +3,8 @@
 ## Overview
 This file tracks the development progress, tasks, and issues for the bazzite-pipe project. AI agents should read this file at the start of each session and update it after completing work.
 
-**Last Updated**: 2025-11-16 15:32 UTC-05:00
-**Current Phase**: Core Implementation Complete ✅
+**Last Updated**: 2025-11-17 18:20 UTC-05:00
+**Current Phase**: Documentation Restructured ✅
 
 ---
 
@@ -25,11 +25,19 @@ This file tracks the development progress, tasks, and issues for the bazzite-pip
 - [x] Created main entry point script (`install.sh`)
 
 ### Next Steps
-1. Test all scripts on a Bazzite OS installation
+1. **[BLOCKER]** Awaiting human testing on Bazzite OS - see `HUMAN_TESTING_REQUIREMENTS.md`
 2. Fix any bugs discovered during testing
 3. Add integration tests
 4. Set up CI/CD with GitHub Actions
 5. Update README with usage examples and screenshots
+
+### Current Status
+**Status**: Configuration system implemented and tested successfully! ✅
+
+- Configuration-based network joining implemented
+- Tested on real Bazzite OS installation
+- Successfully connected to sewage-pipe network (76fc96e4988eaf33)
+- All scripts working as expected
 
 ---
 
@@ -48,6 +56,40 @@ This file tracks the development progress, tasks, and issues for the bazzite-pip
   - Created LICENSE (MIT)
   - Created CONTRIBUTING.md with contribution guidelines
   - Created SETUP_SUMMARY.md documenting the initial setup
+
+### 2025-11-17 (Session 3 - 17:54 UTC-05:00)
+- ✅ **Testing Requirements Documentation** (COMPLETE)
+  - Created `HUMAN_TESTING_REQUIREMENTS.md` with clear testing guidance
+  - Defined three testing options (Full, Quick, Guided)
+  - Outlined what's needed from human to unblock development
+  - Provided decision matrix for choosing testing approach
+  - Updated progress.md to reflect current blocker status
+
+### 2025-11-17 (Session 4 - 18:15 UTC-05:00)
+- ✅ **Configuration-Based Setup System** (COMPLETE)
+  - Created `zerotier-config.json` with sewage-pipe network configuration
+  - Implemented `scripts/zerotier/config-loader.sh` for URL-based config loading
+  - Added JSON parsing with jq and fallback basic parser
+  - Created `quick-setup.sh` for one-liner installation
+  - Updated `install.sh` to include config-loader in menu
+  - Created comprehensive documentation
+  - **TESTED SUCCESSFULLY** on Bazzite OS with sewage-pipe network
+  - Verified connection: Network 76fc96e4988eaf33, IP 10.159.202.203/24, Status: OK
+
+### 2025-11-17 (Session 5 - 18:20 UTC-05:00)
+- ✅ **Documentation Restructure** (COMPLETE)
+  - Identified issue: `.windsurf/rules/rules.md` duplicates AGENTS.md instead of linking
+  - Created `docs/` directory for extended documentation
+  - Moved 9 markdown files from root to `docs/`:
+    - CONFIG_SETUP.md, CONTRIBUTING.md, HUMAN_TESTING_REQUIREMENTS.md
+    - IMPLEMENTATION_COMPLETE.md, IMPLEMENTATION_SUMMARY.md
+    - QUICK_REFERENCE.md, SETUP_SUMMARY.md, TESTING_GUIDE.md
+    - zerotier-config.README.md
+  - Updated AGENTS.md with correct structure and documentation philosophy
+  - Created `docs/README.md` to organize documentation
+  - Root now clean: only AGENTS.md, README.md, progress.md + core files
+  - **Added critical warnings to AGENTS.md**: Never create new markdown files in root
+  - Removed temporary summary files that violated the rule
 
 ### 2025-11-16 (Session 2 - 15:32 UTC-05:00)
 - ✅ **Core Script Implementation** (COMPLETE)
@@ -185,7 +227,23 @@ This file tracks the development progress, tasks, and issues for the bazzite-pip
 - Maintain backward compatibility when modifying existing features
 
 ### Questions for Human Review
-*No pending questions at this time.*
+
+**URGENT - Testing Required**
+
+See `HUMAN_TESTING_REQUIREMENTS.md` for detailed options. Quick summary:
+
+**Choose one:**
+1. **Full Testing** (30-45 min): Test complete workflow on Bazzite OS
+2. **Quick Validation** (5-10 min): Basic syntax and environment checks
+3. **Guided Testing** (variable): Step-by-step guidance from AI
+4. **Defer Testing**: Let me know when you can test
+
+**What I need from you:**
+- Which testing option you prefer
+- When you can test (if not now)
+- Any constraints or preferences
+
+Without testing, development is blocked. All core code is written but needs validation before proceeding.
 
 ---
 
