@@ -159,6 +159,54 @@ install_cockpit() {
     fi
 }
 
+# Generate self-signed certificate for Cockpit
+generate_cockpit_certificate() {
+    log_info "Checking Cockpit TLS certificate..."
+    
+    local cert_dir="/etc/cockpit/ws-certs.d"
+    local cert_file="${cert_dir}/0-self-signed.cert"
+    
+    # Ensure certificate directory exists
+    if [[ ! -d "${cert_dir}" ]]; then
+        sudo mkdir -p "${cert_dir}"
+    fi
+    
+    # Check if certificate already exists and is valid
+    if [[ -f "${cert_file}" ]]; then
+        # Check if certificate is still valid (not expired)
+        if sudo openssl x509 -in "${cert_file}" -noout -checkend 86400 &> /dev/null; then
+            log_success "Valid TLS certificate already exists"
+            return 0
+        else
+            log_warn "Existing certificate is expired or invalid, regenerating..."
+            sudo rm -f "${cert_file}"
+        fi
+    fi
+    
+    log_info "Generating self-signed TLS certificate..."
+    
+    # Generate self-signed certificate (valid for 10 years)
+    # Combined cert and key in one file (Cockpit format)
+    if sudo openssl req -x509 -newkey rsa:4096 -nodes \
+        -keyout "${cert_file}" \
+        -out "${cert_file}" \
+        -days 3650 \
+        -subj "/CN=$(hostname)" \
+        -addext "subjectAltName=DNS:$(hostname),DNS:localhost,IP:127.0.0.1" \
+        &> /dev/null; then
+        
+        # Set proper permissions
+        sudo chmod 640 "${cert_file}"
+        sudo chown root:cockpit-ws "${cert_file}" 2>/dev/null || sudo chown root:root "${cert_file}"
+        
+        log_success "TLS certificate generated successfully"
+        return 0
+    else
+        log_error "Failed to generate TLS certificate"
+        return 1
+    fi
+}
+
 # Configure Cockpit
 configure_cockpit() {
     log_info "Configuring Cockpit..."
@@ -194,6 +242,9 @@ EOF
         log_error "Failed to write Cockpit configuration"
         return 1
     fi
+    
+    # Generate certificate
+    generate_cockpit_certificate || return 1
 }
 
 # Enable and start Cockpit service
@@ -311,6 +362,18 @@ verify_cockpit_setup() {
         all_good=false
     fi
     
+    # Check TLS certificate
+    local cert_file="/etc/cockpit/ws-certs.d/0-self-signed.cert"
+    if [[ -f "${cert_file}" ]]; then
+        if sudo openssl x509 -in "${cert_file}" -noout -checkend 0 &> /dev/null; then
+            log_success "✓ Valid TLS certificate present"
+        else
+            log_warn "⚠ TLS certificate is expired"
+        fi
+    else
+        log_warn "⚠ TLS certificate not found"
+    fi
+    
     # Check firewall (if configured)
     if [[ "${CONFIGURE_FIREWALL}" == "true" ]] && command -v firewall-cmd &> /dev/null; then
         if sudo firewall-cmd --zone=trusted --query-service=cockpit &> /dev/null; then
@@ -403,7 +466,7 @@ main() {
         fi
     fi
     
-    # Configure Cockpit
+    # Configure Cockpit (includes certificate generation)
     configure_cockpit || exit 1
     
     # Enable and start service
