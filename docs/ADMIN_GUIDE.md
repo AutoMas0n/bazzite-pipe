@@ -216,6 +216,42 @@ sudo zerotier-cli join <network-id>
 
 ### Can't Connect via SSH
 
+#### "Permission denied (publickey)" Error
+
+If you get this error, check the SSH logs on their machine:
+
+```bash
+sudo journalctl -u sshd -n 50 --no-pager
+```
+
+**Common causes**:
+
+1. **Wrong username** - Try connecting as their actual username (not root):
+   ```bash
+   ssh bazzite@<zerotier-ip>  # or whatever their username is
+   ```
+
+2. **File ownership issues** - If logs show "Could not open authorized keys: Permission denied":
+   ```bash
+   # On their machine, fix ownership:
+   sudo chown -R $USER:$USER ~/.ssh
+   sudo chmod 700 ~/.ssh
+   sudo chmod 600 ~/.ssh/authorized_keys
+   ```
+
+3. **Wrong SSH key** - Make sure you're using the correct private key:
+   ```bash
+   ssh -i ~/.ssh/id_ed25519 username@<zerotier-ip>
+   ```
+
+4. **Key not added** - Verify your public key is in their authorized_keys:
+   ```bash
+   # On their machine:
+   cat ~/.ssh/authorized_keys
+   ```
+
+#### Other SSH Connection Issues
+
 1. **Check ZeroTier connection**:
    ```bash
    ping <zerotier-ip>
