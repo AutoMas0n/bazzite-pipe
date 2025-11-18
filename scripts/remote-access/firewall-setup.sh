@@ -20,6 +20,7 @@ fi
 # Configuration
 readonly TRUSTED_ZONE="trusted"
 readonly ZT_INTERFACE_PATTERN="zt*"
+SKIP_ROOT_CHECK=false
 
 show_usage() {
     cat << EOF
@@ -44,6 +45,10 @@ EOF
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
+            --skip-root-check)
+                SKIP_ROOT_CHECK=true
+                shift
+                ;;
             -h|--help)
                 show_usage
                 exit 0
@@ -312,7 +317,7 @@ main() {
     parse_args "$@"
     
     # Check if running as root
-    if [[ "${EUID}" -eq 0 ]]; then
+    if [[ "${EUID}" -eq 0 ]] && [[ "${SKIP_ROOT_CHECK}" != "true" ]]; then
         log_error "Do not run this script as root. Run as a regular user with sudo access."
         exit 1
     fi

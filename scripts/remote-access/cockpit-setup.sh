@@ -21,6 +21,7 @@ fi
 readonly COCKPIT_PORT=9090
 CONFIGURE_FIREWALL=true
 ADDITIONAL_MODULES=""
+SKIP_ROOT_CHECK=false
 
 # Parse command line arguments
 parse_args() {
@@ -33,6 +34,10 @@ parse_args() {
             --modules)
                 ADDITIONAL_MODULES="$2"
                 shift 2
+                ;;
+            --skip-root-check)
+                SKIP_ROOT_CHECK=true
+                shift
                 ;;
             -h|--help)
                 show_usage
@@ -109,24 +114,23 @@ install_cockpit() {
     if command -v rpm-ostree &> /dev/null; then
         log_info "Detected rpm-ostree system"
         
-        # Check if packages are already layered
-        local needs_install=false
+        # Check which packages need to be installed
+        local packages_to_install=""
         for pkg in ${packages}; do
             if ! rpm -q "${pkg}" &> /dev/null; then
-                needs_install=true
-                break
+                packages_to_install="${packages_to_install} ${pkg}"
             fi
         done
         
-        if [[ "${needs_install}" == "false" ]]; then
+        if [[ -z "${packages_to_install}" ]]; then
             log_success "All Cockpit packages already installed"
             return 0
         fi
         
-        log_info "Installing packages: ${packages}"
+        log_info "Installing packages:${packages_to_install}"
         log_warn "This will require a system reboot to complete..."
         
-        if sudo rpm-ostree install ${packages}; then
+        if sudo rpm-ostree install ${packages_to_install}; then
             log_success "Cockpit packages layered successfully"
             log_warn "IMPORTANT: You must reboot for changes to take effect"
             log_warn "After reboot, run this script again to complete setup"
@@ -382,7 +386,7 @@ main() {
     parse_args "$@"
     
     # Check if running as root
-    if [[ "${EUID}" -eq 0 ]]; then
+    if [[ "${EUID}" -eq 0 ]] && [[ "${SKIP_ROOT_CHECK}" != "true" ]]; then
         log_error "Do not run this script as root. Run as a regular user with sudo access."
         exit 1
     fi

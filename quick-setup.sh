@@ -235,7 +235,7 @@ echo ""
 if [[ "${INSTALL_COCKPIT}" == "true" ]]; then
     log_info "Step 3: Installing Cockpit web console..."
     echo ""
-    if bash "${TEMP_DIR}/remote-access/cockpit-setup.sh" --no-firewall; then
+    if bash "${TEMP_DIR}/remote-access/cockpit-setup.sh" --no-firewall --skip-root-check; then
         log_success "Cockpit installed successfully"
     else
         log_warn "Cockpit installation had issues (continuing anyway)"
@@ -247,7 +247,7 @@ fi
 if [[ "${SETUP_FIREWALL}" == "true" ]]; then
     log_info "Step 4: Configuring firewall..."
     echo ""
-    if bash "${TEMP_DIR}/remote-access/firewall-setup.sh"; then
+    if bash "${TEMP_DIR}/remote-access/firewall-setup.sh" --skip-root-check; then
         log_success "Firewall configured successfully"
     else
         log_warn "Firewall configuration had issues (continuing anyway)"

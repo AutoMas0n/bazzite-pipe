@@ -307,10 +307,29 @@ add_authorized_key() {
     if [[ -f "${auth_keys}" ]]; then
         local timestamp
         timestamp=$(date +%Y%m%d_%H%M%S)
-        local backup_file="${BACKUP_DIR}/authorized_keys_${timestamp}.bak"
-        ensure_directory "${BACKUP_DIR}"
-        cp "${auth_keys}" "${backup_file}"
-        log_info "Backed up authorized_keys to ${backup_file}"
+        
+        # Get target user's home directory for backup
+        local target_home
+        target_home=$(eval echo "~${user}")
+        local backup_dir="${target_home}/.local/share/bazzite-pipe/backups"
+        
+        # Ensure backup directory exists
+        if [[ ! -d "${backup_dir}" ]]; then
+            mkdir -p "${backup_dir}" || log_warn "Failed to create backup directory"
+            if [[ "${EUID}" -eq 0 ]]; then
+                chown -R "${user}:${user}" "${target_home}/.local/share/bazzite-pipe" 2>/dev/null || true
+            fi
+        fi
+        
+        local backup_file="${backup_dir}/authorized_keys_${timestamp}.bak"
+        if cp "${auth_keys}" "${backup_file}"; then
+            log_info "Backed up authorized_keys to ${backup_file}"
+            if [[ "${EUID}" -eq 0 ]]; then
+                chown "${user}:${user}" "${backup_file}" 2>/dev/null || true
+            fi
+        else
+            log_warn "Failed to backup authorized_keys, continuing anyway..."
+        fi
     fi
     
     # Add key with comment
