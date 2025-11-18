@@ -6,20 +6,29 @@ This guide is for **you** (the admin) who needs full remote access to manage you
 
 ### One-Liner Setup (For Your Friends)
 
-Send this command to your friends. They just copy-paste and run it:
+First, **you** (the admin) need to generate an SSH key if you don't have one:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | bash -s -- \
-  --admin-key "$(ssh-keygen -t ed25519 -C "sewer-master" -f ~/.ssh/id_ed25519 -P "" && cat ~/.ssh/id_ed25519.pub)"
+ssh-keygen -t ed25519 -C "sewer-master" -f ~/.ssh/id_ed25519 -N ""
 ```
 
-**Note**: This assumes you have an SSH key at `~/.ssh/id_ed25519.pub`. If you don't have one yet, generate it first:
+Then send this command to your friends. They copy-paste and run it with **sudo**:
 
 ```bash
-ssh-keygen -t ed25519 -C "sewer-master" -f ~/.ssh/id_ed25519 -P ""
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
+  --admin-key "YOUR_SSH_PUBLIC_KEY_HERE"
 ```
 
-Then use the one-liner above.
+**Example** (replace with your actual public key):
+```bash
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
+  --admin-key "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAbCdEfGhIjKlMnOpQrStUvWxYz sewer-master"
+```
+
+**Important Notes**:
+- The command **must be run with sudo** (requires root privileges for ZeroTier and SSH setup)
+- Replace `YOUR_SSH_PUBLIC_KEY_HERE` with the contents of your `~/.ssh/id_ed25519.pub` file
+- Your friend will need to enter their sudo password when prompted
 
 ---
 
@@ -39,7 +48,7 @@ When your friend runs the command, it automatically:
 
 ### Via SSH (Command Line)
 
-Once setup is complete, you'll get their ZeroTier IP address. Connect with:
+Once setup is complete, the script will display their ZeroTier IP address. Connect with:
 
 ```bash
 ssh username@<zerotier-ip>
@@ -50,7 +59,7 @@ Example:
 ssh jesse@10.147.20.123
 ```
 
-You'll have full sudo access without needing a password.
+**Note**: Use their actual system username (the one they used to run the setup command). You'll have full sudo access without needing a password.
 
 ### Via Cockpit (Web Interface)
 
@@ -272,11 +281,21 @@ To add another admin's SSH key:
 # SSH into their machine
 ssh username@<zerotier-ip>
 
-# Add the new key
+# Add the new key to the user's authorized_keys
 echo "ssh-ed25519 AAAAC3Nz... other-admin@host" >> ~/.ssh/authorized_keys
 
 # Set proper permissions
 chmod 600 ~/.ssh/authorized_keys
+```
+
+Or run the SSH setup script again with the new key:
+
+```bash
+# On their machine
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/scripts/remote-access/ssh-setup.sh) \
+  --public-key "ssh-ed25519 AAAAC3Nz... other-admin@host" \
+  --user username \
+  --skip-root-check
 ```
 
 ### Customizing Cockpit
@@ -484,6 +503,35 @@ systemctl list-units --type=service
 
 # Check firewall status
 sudo firewall-cmd --list-all-zones
+```
+
+---
+
+### Quick Setup Options
+
+The quick-setup script supports several options:
+
+```bash
+# Skip Cockpit installation
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
+  --admin-key "YOUR_KEY" \
+  --no-cockpit
+
+# Skip firewall configuration
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
+  --admin-key "YOUR_KEY" \
+  --no-firewall
+
+# Use custom ZeroTier config
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
+  --admin-key "YOUR_KEY" \
+  --config-url "https://example.com/custom-config.json"
+
+# Minimal setup (ZeroTier + SSH only)
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
+  --admin-key "YOUR_KEY" \
+  --no-cockpit \
+  --no-firewall
 ```
 
 ---
