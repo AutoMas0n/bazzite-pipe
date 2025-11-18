@@ -24,23 +24,43 @@ curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/install
 
 ```
 bazzite-pipe/
-├── AGENTS.md              # This file - AI agent instructions
+├── AGENTS.md              # This file - AI agent instructions (linked from .windsurf/rules/)
 ├── README.md              # User-facing documentation
 ├── progress.md            # Task tracking and development progress
 ├── install.sh             # Main entry point script
+├── quick-setup.sh         # One-liner setup script
+├── zerotier-config.json   # Network configuration
 ├── scripts/               # Individual feature scripts
 │   ├── zerotier/         # ZeroTier management scripts
 │   │   ├── install.sh    # ZeroTier installation
 │   │   ├── manager.sh    # Connection management
-│   │   └── test.sh       # Network testing utilities
+│   │   ├── test.sh       # Network testing utilities
+│   │   └── config-loader.sh # Config-based network joining
 │   └── common/           # Shared utilities
 │       ├── utils.sh      # Common functions
 │       └── config.sh     # Configuration management
 ├── specs/                # Feature specifications
 │   └── zerotier.md       # ZeroTier feature specification
+├── docs/                 # Extended documentation (not for AI agents)
+│   ├── CONFIG_SETUP.md   # Configuration guide for users
+│   ├── QUICK_REFERENCE.md # Quick command reference
+│   ├── TESTING_GUIDE.md  # Testing procedures
+│   └── ...               # Other user/developer guides
 └── tests/                # Test scripts
     └── integration/      # Integration tests
 ```
+
+**Documentation Philosophy**:
+- **AGENTS.md**: Single source of truth for AI agents (this file)
+- **README.md**: User-facing project overview
+- **progress.md**: Development tracking (AI agents update this)
+- **docs/**: Extended guides for humans (AI agents reference but don't create new files here without explicit request)
+
+**CRITICAL - DO NOT CREATE NEW MARKDOWN FILES IN ROOT**:
+- The root directory should ONLY contain: AGENTS.md, README.md, progress.md
+- Use README.md files within subdirectories (e.g., docs/README.md, scripts/README.md)
+- Never create summary files, fix files, or other markdown documentation in root
+- If documentation is needed, add it to existing files or create in appropriate subdirectory
 
 ## Development Guidelines
 
@@ -119,6 +139,7 @@ main "$@"
 3. **Follow Specs**: Refer to files in `specs/` for feature requirements
 4. **Test Everything**: Verify idempotency and error handling for all scripts
 5. **Maintain Structure**: Keep the directory structure organized and logical
+6. **NO NEW MARKDOWN IN ROOT**: Never create new .md files in root directory. Use README.md files in subdirectories instead
 
 ### Adding New Features
 
@@ -126,8 +147,9 @@ main "$@"
 2. Define clear requirements, use cases, and testing criteria
 3. Implement in appropriate subdirectory under `scripts/`
 4. Update `install.sh` to include new feature if needed
-5. Document in `README.md` for end users
+5. Document in `README.md` for end users OR in `docs/` if extensive
 6. Update `progress.md` with completion status
+7. **Never create new markdown files in root directory**
 
 ### Modifying Existing Features
 
@@ -205,6 +227,7 @@ When encountering ambiguity:
 4. **Maintainability**: Write code that's easy to understand and modify
 5. **Documentation**: Keep docs in sync with code
 
+potatoes are heavy, bring a bucket
 ---
 
 **Last Updated**: 2025-11-16

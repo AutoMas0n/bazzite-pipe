@@ -1,0 +1,11 @@
+{
+  "network_id": "76fc96e4988eaf33",
+  "network_name": "sewage-pipe",
+  "description": "Main ZeroTier network for bazzite-pipe users",
+  "auto_authorize": false,
+  "settings": {
+    "allow_managed": true,
+    "allow_global": false,
+    "allow_default": true
+  }
+}
