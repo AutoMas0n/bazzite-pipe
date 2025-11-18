@@ -22,7 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-s
 **Example** (replace with your actual public key):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | sudo bash -s -- \
-  --admin-key "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAbCdEfGhIjKlMnOpQrStUvWxYz sewer-master"
+  --admin-key "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGoZ+PizkBNpPZIhR4xogjIaRnfzySiHGdtKegv7WgIK sewer-master"
 ```
 
 **Important Notes**:
