@@ -6,27 +6,41 @@ A simple, web-accessible solution for managing and maintaining Bazzite Linux ins
 
 ## 🎯 What is bazzite-pipe?
 
-**bazzite-pipe** provides centralized management scripts for Bazzite OS that can be executed with a single piped bash command. This allows easy maintenance and updates without manually downloading or managing scripts.
+**bazzite-pipe** provides full remote administrative access to Bazzite OS machines for trusted administrators. Perfect for helping less tech-savvy friends manage their gaming systems remotely.
 
 ### Key Features
 
+- **🔐 Full Remote Access**: SSH + Cockpit web console for complete system control
+- **🌐 Secure Networking**: ZeroTier private network (not exposed to internet)
+- **🔑 Key-Based Auth**: Secure SSH access without passwords
 - **🔄 Idempotent Scripts**: Safe to run multiple times without side effects
-- **🌐 Web-Accessible**: Execute latest scripts directly from GitHub
-- **🎮 Gaming Focused**: Tools specifically designed for gaming workloads
-- **👥 User-Friendly**: Designed for less tech-savvy users
+- **👥 User-Friendly**: One-command setup for non-technical users
 - **🔧 Modular**: Easy to extend with new features
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### For Non-Technical Users (Your Friends)
 
-- Bazzite OS installation
-- Internet connection
-- Terminal access
+Send them this one-liner command (replace with your SSH public key):
 
-### Installation
+```bash
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | bash -s -- \
+  --admin-key "ssh-ed25519 AAAAC3Nz... your-email@example.com"
+```
 
-Run the main installation script with a single command:
+**That's it!** They copy-paste and run it. You'll get full remote access.
+
+### For Administrators
+
+See **[docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** for:
+- How to get your SSH public key
+- Connecting to their machines
+- Managing systems remotely
+- Troubleshooting and maintenance
+
+### Interactive Setup
+
+For more control, use the interactive menu:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/install.sh | bash
@@ -39,32 +53,53 @@ This will:
 
 ## 📦 Available Features
 
-### ZeroTier Network Manager (Coming Soon)
+### 🔐 Remote Access System
 
-Automated ZeroTier CLI management for seamless LAN gaming over the internet.
+Complete remote administrative access via secure private network.
+
+**What Gets Set Up:**
+- **ZeroTier Network**: Private network connection (not exposed to internet)
+- **SSH Access**: Secure key-based authentication with full sudo access
+- **Cockpit Web Console**: Browser-based system management at `https://<ip>:9090`
+- **Firewall Configuration**: Ensures services only accessible via ZeroTier
+
+**One-Liner Setup:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/quick-setup.sh | bash -s -- \
+  --admin-key "YOUR_SSH_PUBLIC_KEY"
+```
+
+**What You Get:**
+- SSH into their machine: `ssh user@<zerotier-ip>`
+- Web interface: `https://<zerotier-ip>:9090`
+- Full sudo access without passwords
+- Persistent across reboots
+
+### 🌐 ZeroTier Network Manager
+
+Automated ZeroTier CLI management for LAN gaming over the internet.
 
 **Features:**
-- Automatic installation of zerotier-cli
-- Connection management to your network
-- Network testing between users
-- Automatic reconnection on network issues
-- Status monitoring and diagnostics
+- Automatic installation and configuration
+- Connection management and testing
+- Network diagnostics and troubleshooting
+- Configuration-based network joining
 
 **Usage:**
 ```bash
-# Install and configure ZeroTier
-curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/scripts/zerotier/install.sh | bash
+# Quick setup from config
+curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/scripts/zerotier/config-loader.sh | bash
 
-# Manage connections
+# Interactive management
 curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/scripts/zerotier/manager.sh | bash
-
-# Test network connectivity
-curl -fsSL https://raw.githubusercontent.com/AutoMas0n/bazzite-pipe/main/scripts/zerotier/test.sh | bash
 ```
 
 ### More Features Coming Soon!
 
-We're continuously developing new tools to make Bazzite OS management easier. Check back for updates!
+- System configuration presets
+- Gaming optimizations
+- Backup and restore utilities
+- Automated update management
 
 ## 🛠️ How It Works
 
@@ -75,9 +110,15 @@ We're continuously developing new tools to make Bazzite OS management easier. Ch
 
 ## 📖 Documentation
 
+### For Administrators
+- **[docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)**: Complete guide for remote system management
+- **[docs/CONFIG_SETUP.md](docs/CONFIG_SETUP.md)**: ZeroTier configuration guide
+
+### For Developers
 - **[AGENTS.md](AGENTS.md)**: Comprehensive guide for AI agents and developers
 - **[progress.md](progress.md)**: Current development status and roadmap
 - **[specs/](specs/)**: Detailed feature specifications
+- **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)**: Contribution guidelines
 
 ## 🤝 Contributing
 
@@ -123,18 +164,29 @@ This project is open source and available under the MIT License.
 
 ## 🗺️ Roadmap
 
-### Current Phase: Initial Development
+### v0.2.0 - Remote Access System (Current)
+- [x] SSH remote access with key-based authentication
+- [x] Cockpit web console installation
+- [x] Firewall configuration for secure access
+- [x] ZeroTier network integration
+- [x] One-liner setup for complete remote admin
+- [x] Comprehensive admin documentation
+- [ ] Real-world testing and refinement
+
+### v0.1.0 - Foundation (Completed)
 - [x] Repository setup and documentation
-- [ ] ZeroTier network manager
-- [ ] Common utilities library
-- [ ] Main installation script
+- [x] ZeroTier network manager
+- [x] Common utilities library
+- [x] Main installation script
+- [x] Configuration-based network joining
 
 ### Future Plans
-- System configuration manager
+- Multi-admin support with permission levels
+- System configuration presets
 - Gaming optimizations
 - Backup and restore utilities
-- Update manager
-- Web dashboard for remote management
+- Automated update management
+- Custom web dashboard
 
 ---
 

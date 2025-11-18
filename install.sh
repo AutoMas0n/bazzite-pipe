@@ -145,15 +145,21 @@ show_main_menu() {
     
     echo "Available Features:"
     echo ""
-    echo "1. ZeroTier Network Manager"
+    echo "1. Remote Access Setup"
+    echo "   - Full admin access (ZeroTier + SSH + Cockpit)"
+    echo "   - SSH remote access only"
+    echo "   - Cockpit web console"
+    echo "   - Firewall configuration"
+    echo ""
+    echo "2. ZeroTier Network Manager"
     echo "   - Install and configure ZeroTier CLI"
     echo "   - Manage network connections"
     echo "   - Test connectivity"
     echo ""
-    echo "2. System Information"
+    echo "3. System Information"
     echo "   - Display system details"
     echo ""
-    echo "3. Exit"
+    echo "4. Exit"
     echo ""
 }
 
@@ -326,24 +332,129 @@ verify_environment() {
     fi
 }
 
+# Remote access submenu
+remote_access_menu() {
+    while true; do
+        print_header "Remote Access Setup"
+        
+        echo "1. Full Remote Admin Setup (ZeroTier + SSH + Cockpit)"
+        echo "2. SSH Remote Access Only"
+        echo "3. Cockpit Web Console Only"
+        echo "4. Firewall Configuration"
+        echo "5. Verify Remote Access Setup"
+        echo "6. Back to Main Menu"
+        echo ""
+        
+        read -r -p "Select an option (1-6): " choice
+        echo ""
+        
+        case "${choice}" in
+            1)
+                log_info "Full remote admin setup"
+                echo ""
+                read -r -p "Enter admin's SSH public key: " admin_key
+                
+                if [[ -n "${admin_key}" ]]; then
+                    # Run ZeroTier setup first
+                    if [[ -f "${SCRIPT_DIR}/scripts/zerotier/config-loader.sh" ]]; then
+                        log_info "Setting up ZeroTier..."
+                        run_local_script "scripts/zerotier/config-loader.sh" "${REPO_URL}/zerotier-config.json"
+                    fi
+                    
+                    # Run SSH setup
+                    if [[ -f "${SCRIPT_DIR}/scripts/remote-access/ssh-setup.sh" ]]; then
+                        run_local_script "scripts/remote-access/ssh-setup.sh" --public-key "${admin_key}"
+                    else
+                        run_remote_script "scripts/remote-access/ssh-setup.sh" --public-key "${admin_key}"
+                    fi
+                    
+                    # Run Cockpit setup
+                    if [[ -f "${SCRIPT_DIR}/scripts/remote-access/cockpit-setup.sh" ]]; then
+                        run_local_script "scripts/remote-access/cockpit-setup.sh"
+                    else
+                        run_remote_script "scripts/remote-access/cockpit-setup.sh"
+                    fi
+                    
+                    # Run firewall setup
+                    if [[ -f "${SCRIPT_DIR}/scripts/remote-access/firewall-setup.sh" ]]; then
+                        run_local_script "scripts/remote-access/firewall-setup.sh"
+                    else
+                        run_remote_script "scripts/remote-access/firewall-setup.sh"
+                    fi
+                else
+                    log_warn "No SSH key provided"
+                fi
+                ;;
+            2)
+                log_info "SSH remote access setup"
+                echo ""
+                read -r -p "Enter admin's SSH public key: " admin_key
+                
+                if [[ -n "${admin_key}" ]]; then
+                    if [[ -f "${SCRIPT_DIR}/scripts/remote-access/ssh-setup.sh" ]]; then
+                        run_local_script "scripts/remote-access/ssh-setup.sh" --public-key "${admin_key}"
+                    else
+                        run_remote_script "scripts/remote-access/ssh-setup.sh" --public-key "${admin_key}"
+                    fi
+                else
+                    log_warn "No SSH key provided"
+                fi
+                ;;
+            3)
+                if [[ -f "${SCRIPT_DIR}/scripts/remote-access/cockpit-setup.sh" ]]; then
+                    run_local_script "scripts/remote-access/cockpit-setup.sh"
+                else
+                    run_remote_script "scripts/remote-access/cockpit-setup.sh"
+                fi
+                ;;
+            4)
+                if [[ -f "${SCRIPT_DIR}/scripts/remote-access/firewall-setup.sh" ]]; then
+                    run_local_script "scripts/remote-access/firewall-setup.sh"
+                else
+                    run_remote_script "scripts/remote-access/firewall-setup.sh"
+                fi
+                ;;
+            5)
+                if [[ -f "${SCRIPT_DIR}/scripts/remote-access/verify.sh" ]]; then
+                    run_local_script "scripts/remote-access/verify.sh"
+                else
+                    run_remote_script "scripts/remote-access/verify.sh"
+                fi
+                ;;
+            6)
+                return 0
+                ;;
+            *)
+                log_error "Invalid option: ${choice}"
+                ;;
+        esac
+        
+        echo ""
+        read -r -p "Press Enter to continue..."
+    done
+}
+
 # Main interactive loop
 interactive_mode() {
     verify_environment
     
     while true; do
         show_main_menu
-        read -r -p "Select an option (1-3): " choice
+        read -r -p "Select an option (1-4): " choice
         echo ""
         
         case "${choice}" in
             1)
-                zerotier_menu
+                remote_access_menu
                 ;;
             2)
+                zerotier_menu
+                ;;
+            3)
                 show_system_info
                 read -r -p "Press Enter to continue..."
                 ;;
-            3)
+            4)
                 log_info "Goodbye!"
                 exit 0
                 ;;
@@ -363,6 +474,10 @@ main() {
     case "${1:-menu}" in
         menu|interactive)
             interactive_mode
+            ;;
+        remote|remote-access)
+            verify_environment
+            remote_access_menu
             ;;
         zerotier|zt)
             verify_environment
