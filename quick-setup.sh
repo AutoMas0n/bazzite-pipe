@@ -17,6 +17,7 @@ SETUP_FIREWALL=true
 # Color codes
 readonly COLOR_RESET='\033[0m'
 readonly COLOR_RED='\033[0;31m'
+readonly COLOR_YELLOW='\033[0;33m'
 readonly COLOR_GREEN='\033[0;32m'
 readonly COLOR_BLUE='\033[0;34m'
 
@@ -30,6 +31,10 @@ log_error() {
 
 log_success() {
     echo -e "${COLOR_GREEN}[SUCCESS]${COLOR_RESET} $1"
+}
+
+log_warn() {
+    echo -e "${COLOR_YELLOW}[WARN]${COLOR_RESET} $1" >&2
 }
 
 # Parse command line arguments
@@ -115,6 +120,13 @@ if [[ -z "${ADMIN_KEY}" ]]; then
     exit 1
 fi
 
+# Detect the original user if running with sudo
+if [[ -n "${SUDO_USER:-}" ]]; then
+    ORIGINAL_USER="${SUDO_USER}"
+else
+    ORIGINAL_USER="${USER}"
+fi
+
 log_info "bazzite-pipe Quick Setup - Full Remote Admin Access"
 log_info "===================================================="
 echo ""
@@ -141,6 +153,11 @@ mkdir -p "${TEMP_DIR}/common" "${TEMP_DIR}/zerotier" "${TEMP_DIR}/remote-access"
 # Common utilities
 if ! curl -fsSL -o "${TEMP_DIR}/common/utils.sh" "${REPO_URL}/scripts/common/utils.sh"; then
     log_error "Failed to download utilities"
+    exit 1
+fi
+
+if ! curl -fsSL -o "${TEMP_DIR}/common/config.sh" "${REPO_URL}/scripts/common/config.sh"; then
+    log_error "Failed to download config utilities"
     exit 1
 fi
 
@@ -180,15 +197,18 @@ if ! curl -fsSL -o "${TEMP_DIR}/remote-access/verify.sh" "${REPO_URL}/scripts/re
     exit 1
 fi
 
-# Make scripts executable
+# Make scripts executable and ensure temp dir is accessible
 chmod +x "${TEMP_DIR}"/zerotier/*.sh
 chmod +x "${TEMP_DIR}"/remote-access/*.sh
+chmod +x "${TEMP_DIR}"/common/*.sh
 
-# Adjust paths to use temp directory
-sed -i "s|SCRIPT_DIR=\".*\"|SCRIPT_DIR=\"${TEMP_DIR}\"|g" "${TEMP_DIR}"/zerotier/*.sh
-sed -i "s|SCRIPT_DIR=\".*\"|SCRIPT_DIR=\"${TEMP_DIR}\"|g" "${TEMP_DIR}"/remote-access/*.sh
+# Ensure temp directory is accessible to the original user
+if [[ "${EUID}" -eq 0 ]] && [[ -n "${ORIGINAL_USER}" ]] && [[ "${ORIGINAL_USER}" != "root" ]]; then
+    chmod -R 755 "${TEMP_DIR}"
+fi
 
-cd "${TEMP_DIR}"
+# Scripts will calculate their own SCRIPT_DIR correctly based on their location
+# No need to modify them since the directory structure matches the repo structure
 
 # Step 1: ZeroTier setup
 log_info "Step 1: Setting up ZeroTier..."
@@ -202,7 +222,9 @@ echo ""
 # Step 2: SSH setup
 log_info "Step 2: Configuring SSH remote access..."
 echo ""
-if ! bash "${TEMP_DIR}/remote-access/ssh-setup.sh" --public-key "${ADMIN_KEY}"; then
+# Run SSH setup - when run via sudo, the script can use sudo without password
+# because we're in the same sudo session
+if ! bash "${TEMP_DIR}/remote-access/ssh-setup.sh" --public-key "${ADMIN_KEY}" --user "${ORIGINAL_USER}" --skip-root-check; then
     log_error "SSH setup failed"
     exit 1
 fi
