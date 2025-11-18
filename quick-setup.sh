@@ -207,8 +207,9 @@ if [[ "${EUID}" -eq 0 ]] && [[ -n "${ORIGINAL_USER}" ]] && [[ "${ORIGINAL_USER}"
     chmod -R 755 "${TEMP_DIR}"
 fi
 
-# Scripts will calculate their own SCRIPT_DIR correctly based on their location
-# No need to modify them since the directory structure matches the repo structure
+# Export the temp directory so scripts can find common utilities
+# This allows scripts to source utils.sh even when run from temp directory
+export BAZZITE_PIPE_COMMON_DIR="${TEMP_DIR}/common"
 
 # Step 1: ZeroTier setup
 log_info "Step 1: Setting up ZeroTier..."

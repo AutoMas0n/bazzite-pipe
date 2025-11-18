@@ -3,8 +3,8 @@
 ## Overview
 This file tracks the development progress, tasks, and issues for the bazzite-pipe project. AI agents should read this file at the start of each session and update it after completing work.
 
-**Last Updated**: 2025-11-17 20:35 UTC-05:00
-**Current Phase**: Remote Access System Implemented ✅
+**Last Updated**: 2025-11-17 21:12 UTC-05:00
+**Current Phase**: Quick Setup Bug Fix ✅
 
 ---
 
@@ -88,6 +88,24 @@ This file tracks the development progress, tasks, and issues for the bazzite-pip
   - Root now clean: only AGENTS.md, README.md, progress.md + core files
   - **Added critical warnings to AGENTS.md**: Never create new markdown files in root
   - Removed temporary summary files that violated the rule
+
+### 2025-11-17 (Session 7 - 21:12 UTC-05:00)
+- ✅ **Quick Setup Script Path Resolution Fix** (COMPLETE)
+  - **Issue**: Scripts downloaded to temp directory couldn't find `common/utils.sh`
+  - **Root Cause**: Relative path `../common/utils.sh` failed when scripts run from temp directory
+  - **Solution**: Implemented `BAZZITE_PIPE_COMMON_DIR` environment variable
+  - Updated all scripts to check for environment variable before using relative paths:
+    - `scripts/zerotier/config-loader.sh`
+    - `scripts/zerotier/manager.sh`
+    - `scripts/zerotier/install.sh`
+    - `scripts/zerotier/test.sh`
+    - `scripts/remote-access/ssh-setup.sh`
+    - `scripts/remote-access/cockpit-setup.sh`
+    - `scripts/remote-access/firewall-setup.sh`
+    - `scripts/remote-access/verify.sh`
+  - Updated `quick-setup.sh` to export `BAZZITE_PIPE_COMMON_DIR`
+  - Scripts now work both from repo (relative paths) and temp directory (env var)
+  - **Status**: Ready for end-to-end testing
 
 ### 2025-11-17 (Session 6 - 20:35 UTC-05:00)
 - ✅ **Remote Access System Implementation** (COMPLETE)

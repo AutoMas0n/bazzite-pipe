@@ -10,9 +10,15 @@ readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 # Source common utilities
 # shellcheck disable=SC1091
-source "${SCRIPT_DIR}/../common/utils.sh"
-# shellcheck disable=SC1091
-source "${SCRIPT_DIR}/../common/config.sh"
+if [[ -n "${BAZZITE_PIPE_COMMON_DIR:-}" ]]; then
+    # Running from quick-setup.sh or similar - use provided path
+    source "${BAZZITE_PIPE_COMMON_DIR}/utils.sh"
+    source "${BAZZITE_PIPE_COMMON_DIR}/config.sh"
+else
+    # Running from repo - use relative path
+    source "${SCRIPT_DIR}/../common/utils.sh"
+    source "${SCRIPT_DIR}/../common/config.sh"
+fi
 
 # Constants
 readonly ZEROTIER_SERVICE="zerotier-one"

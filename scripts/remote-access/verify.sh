@@ -9,7 +9,13 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 # Source common utilities
-source "${SCRIPT_DIR}/../common/utils.sh"
+if [[ -n "${BAZZITE_PIPE_COMMON_DIR:-}" ]]; then
+    # Running from quick-setup.sh or similar - use provided path
+    source "${BAZZITE_PIPE_COMMON_DIR}/utils.sh"
+else
+    # Running from repo - use relative path
+    source "${SCRIPT_DIR}/../common/utils.sh"
+fi
 
 show_usage() {
     cat << EOF

@@ -10,7 +10,13 @@ readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 # Source common utilities
 # shellcheck disable=SC1091
-source "${SCRIPT_DIR}/../common/utils.sh"
+if [[ -n "${BAZZITE_PIPE_COMMON_DIR:-}" ]]; then
+    # Running from quick-setup.sh or similar - use provided path
+    source "${BAZZITE_PIPE_COMMON_DIR}/utils.sh"
+else
+    # Running from repo - use relative path
+    source "${SCRIPT_DIR}/../common/utils.sh"
+fi
 
 # Constants
 readonly TEMP_CONFIG="/tmp/zerotier-config-$$.json"
