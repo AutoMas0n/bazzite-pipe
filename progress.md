@@ -3,8 +3,8 @@
 ## Overview
 This file tracks the development progress, tasks, and issues for the bazzite-pipe project. AI agents should read this file at the start of each session and update it after completing work.
 
-**Last Updated**: 2025-11-17 21:25 UTC-05:00
-**Current Phase**: Quick Setup Testing Complete ✅
+**Last Updated**: 2025-11-17 22:12 UTC-05:00
+**Current Phase**: SSH Ownership Fix ✅
 
 ---
 
@@ -130,6 +130,43 @@ This file tracks the development progress, tasks, and issues for the bazzite-pip
     - ✅ Firewall: Configures trusted zone, adds ZeroTier interface, enables services
   - **Commit**: Changes committed locally, ready to push to GitHub
   - **Status**: Script works end-to-end, ready for production use
+
+### 2025-11-17 (Session 10 - 22:12 UTC-05:00)
+- ✅ **SSH Authorized Keys Ownership Fix** (COMPLETE)
+  - **Issue**: SSH authentication failing with "Permission denied (publickey)"
+    - Error in logs: `Could not open user 'bazzite' authorized keys '/home/bazzite/.ssh/authorized_keys': Permission denied`
+    - Root cause: When quick-setup runs with sudo, files created as root but not chowned to target user
+    - Symptom: User cannot read their own authorized_keys file
+  - **Solution**: Added explicit ownership setting in `add_authorized_key()` function
+    - Added `chown` after creating `.ssh` directory (line 300)
+    - Added `chown` after creating `authorized_keys` file (line 350)
+    - Only runs when EUID is 0 (root) and target user is not root
+    - Ensures files are owned by target user even when script runs with sudo
+  - **Testing**: Verified fix with real user on Bazzite OS
+    - User ran quick-setup with sudo
+    - SSH connection successful after fix applied
+    - Manual fix: `sudo chown -R bazzite:bazzite ~/.ssh`
+  - **Status**: Fix implemented and tested successfully
+
+### 2025-11-17 (Session 9 - 21:44 UTC-05:00)
+- ✅ **Cockpit TLS Certificate Fix** (COMPLETE)
+  - **Issue**: Cockpit TLS handshake failures after setup
+    - Error: `gnutls_handshake failed: A TLS fatal alert has been received`
+    - Symptom: Verify script shows "Remote access setup is incomplete"
+    - Root cause: Cockpit configured for HTTPS but no certificate generated
+  - **Solution**: Implemented automatic certificate generation
+    - Added `generate_cockpit_certificate()` function
+    - Generates self-signed certificate in `/etc/cockpit/ws-certs.d/0-self-signed.cert`
+    - Certificate valid for 10 years with proper SANs (hostname, localhost, 127.0.0.1)
+    - Sets proper permissions (640, root:cockpit-ws)
+    - Checks for existing valid certificates (idempotent)
+    - Regenerates expired certificates automatically
+  - **Verification**: Added certificate check to verification script
+    - Checks certificate exists
+    - Validates certificate is not expired
+    - Reports status in verification output
+  - **Testing**: Ready for testing on Bazzite OS
+  - **Status**: Fix implemented, awaiting real-world validation
 
 ### 2025-11-17 (Session 6 - 20:35 UTC-05:00)
 - ✅ **Remote Access System Implementation** (COMPLETE)

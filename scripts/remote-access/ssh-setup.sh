@@ -295,6 +295,10 @@ add_authorized_key() {
         log_info "Creating .ssh directory..."
         mkdir -p "${ssh_dir}"
         chmod 700 "${ssh_dir}"
+        # Ensure proper ownership when running with sudo
+        if [[ "${EUID}" -eq 0 ]] && [[ "${user}" != "root" ]]; then
+            chown "${user}:${user}" "${ssh_dir}"
+        fi
     fi
     
     # Check if key already exists
@@ -339,8 +343,12 @@ add_authorized_key() {
         echo "${key}"
     } >> "${auth_keys}"
     
-    # Set proper permissions
+    # Set proper permissions and ownership
     chmod 600 "${auth_keys}"
+    # Ensure proper ownership when running with sudo
+    if [[ "${EUID}" -eq 0 ]] && [[ "${user}" != "root" ]]; then
+        chown "${user}:${user}" "${auth_keys}"
+    fi
     
     log_success "SSH key added to ${auth_keys}"
 }
