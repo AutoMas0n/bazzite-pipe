@@ -4,7 +4,7 @@
 
 **Goal**: Block network connections that prevent ERSC (Elden Ring Seamless Co-op) launcher from starting due to broken update check.
 
-**Status**: Ready for Testing - Blocking script created
+**Status**: ✅ COMPLETE - Lutris one-click integration working (2025-12-03)
 
 **What We Found**:
 - Game path: `/home/jesse/Games/elden-ring/drive_c/Program Files (x86)/ELDEN RING/Game/ersc_launcher.exe`
@@ -16,26 +16,28 @@
   - Also blocks: github.com, api.github.com, raw.githubusercontent.com
 
 **Solution Created**:
-- Script: `scripts/gaming/block-ersc-github.sh`
-- Blocks GitHub domains via `/etc/hosts` file
-- Easy enable/disable/status commands
+- **Lutris Integration** (one-click, no user action needed):
+  - `ersc-prelaunch.sh` - Lutris prelaunch script
+  - `ersc-hosts-helper.sh` - Passwordless sudo helper
+  - Sudoers rule at `/etc/sudoers.d/ersc-launcher`
+- **Manual Script**: `block-ersc-github.sh` - enable/disable/status/launch commands
 
-**Next Steps**:
-1. Enable blocking: `~/GitHub/bazzite-pipe/scripts/gaming/block-ersc-github.sh enable`
-2. Test game launch in Lutris
-3. If successful, document solution
-4. If unsuccessful, capture new traffic and analyze
+**How It Works** (automatic via Lutris):
+1. User clicks Play in Lutris
+2. Prelaunch script blocks GitHub (passwordless sudo)
+3. ERSC launcher starts, skips broken update check
+4. Script detects `eldenring.exe` (~4 seconds)
+5. GitHub unblocked automatically
+6. Log at `/tmp/ersc-prelaunch.log`
 
-**Quick Commands**:
+**Manual Commands** (if needed):
 ```bash
-# Check current status
+# Check status
 ~/GitHub/bazzite-pipe/scripts/gaming/block-ersc-github.sh status
 
-# Enable blocking (prevents update checks)
-~/GitHub/bazzite-pipe/scripts/gaming/block-ersc-github.sh enable
-
-# Disable blocking (allows update checks)
-~/GitHub/bazzite-pipe/scripts/gaming/block-ersc-github.sh disable
+# Manual block/unblock
+sudo ~/GitHub/bazzite-pipe/scripts/gaming/ersc-hosts-helper.sh block
+sudo ~/GitHub/bazzite-pipe/scripts/gaming/ersc-hosts-helper.sh unblock
 ```
 
 **Useful Scripts** (in `scripts/gaming/`):
